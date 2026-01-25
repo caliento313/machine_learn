@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from sklearn import naive_bayes
 from sklearn import linear_model
 
-
+# leitura do arquivo excel
 df = pd.read_excel("data/DadosComunidade2.xlsx") 
 df = df.loc[:, ~df.columns.str.contains("^Unnamed")]
 #print(df.info())
@@ -40,12 +40,13 @@ dammy[num_vars] = df[num_vars].copy()
 dammy['pessoa feliz'] = df['Voce se considera uma pessoa feliz?'].copy()
 print(dammy)
 
-
+#%% separação das variaveis preditoras e variavel alvo
 features = dammy.columns[:-1].tolist()
 X = dammy[features]
 y = dammy['pessoa feliz']  
 
 #%%
+#Treinamento dos modelos
 arvore = tree.DecisionTreeClassifier(random_state=42, min_samples_leaf=5)
 arvore.fit(X, y)
 arvore_predict = arvore.predict(X)
@@ -60,6 +61,7 @@ reg_predict = reg.predict(X)
 print(reg_predict) 
 
 #%%
+#Criação do DataFrame para comparação dos resultados
 df_predict = dammy[['pessoa feliz']].copy()
 df_predict['predict_arvore'] = arvore_predict
 df_predict['predict_proba'] = arvore.predict_proba(X)[:,1]  
@@ -76,7 +78,7 @@ df_predict['proba_reg'] = reg.predict_proba(X)[:,1]
 #print(md)
 #md2 = pd.crosstab(df_predict['pessoa feliz'], df_predict['predict_arvore'])
 #print(md2)
-
+#%% Cálculo das métricas com sklearn
 acc_arvore = metrics.accuracy_score(df_predict['pessoa feliz'], df_predict['predict_arvore'])
 #print(acc_arvore)
 precisao_arvore = metrics.precision_score(df_predict['pessoa feliz'], df_predict['predict_arvore'])
@@ -89,6 +91,7 @@ auc_arvore = metrics.auc(roc_arvore[0], roc_arvore[1])
 print(auc_arvore)
 
 #%% 
+#Cálculo das métricas do Naive Bayes
 acc_naive = metrics.accuracy_score(df_predict['pessoa feliz'], df_predict['predict_naive'])
 #print(acc_naive)
 precisao_naive = metrics.precision_score(df_predict['pessoa feliz'], df_predict['predict_naive'])
@@ -101,6 +104,8 @@ auc_naive = metrics.auc(roc_naive[0], roc_naive[1])
 print(auc_naive)  
 
 
+#%% 
+#Cálculo das métricas da Regressão Logística
 acc_reg = metrics.accuracy_score(df_predict['pessoa feliz'], df_predict['predict_reg'])
 #print(acc_reg)
 precisao_reg = metrics.precision_score(df_predict['pessoa feliz'], df_predict['predict_reg'])
@@ -111,7 +116,8 @@ roc_reg = metrics.roc_curve(df_predict['pessoa feliz'], df_predict['proba_reg'])
 #print(roc_reg)
 auc_reg = metrics.auc(roc_reg[0], roc_reg[1])
 print(auc_reg)  
-
+#%% 
+#Plotagem da Curva ROC  
 plt.figure(dpi=100)
 plt.plot(roc_arvore[0], roc_arvore[1],'o-')
 plt.plot(roc_naive[0], roc_naive[1],'o-')
