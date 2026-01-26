@@ -40,27 +40,30 @@ dammy[num_vars] = df[num_vars].copy()
 dammy['pessoa feliz'] = df['Voce se considera uma pessoa feliz?'].copy()
 print(dammy)
 
-#%% separação das variaveis preditoras e variavel alvo
+# separação das variaveis preditoras e variavel alvo
 features = dammy.columns[:-1].tolist()
 X = dammy[features]
 y = dammy['pessoa feliz']  
 
-#%%
+
 #Treinamento dos modelos
+#modelo de Árvore de Decisão
 arvore = tree.DecisionTreeClassifier(random_state=42, min_samples_leaf=5)
 arvore.fit(X, y)
 arvore_predict = arvore.predict(X)
 print(arvore_predict)
+#modelo de Naive Bayes
 naive = naive_bayes.GaussianNB()
 naive.fit(X, y)
 naive_predict = naive.predict(X)
-print(naive_predict)   
+print(naive_predict) 
+#modelo de Regressão Logística  
 reg = linear_model.LogisticRegression(penalty=None, fit_intercept=True)
 reg.fit(X, y)
 reg_predict = reg.predict(X)
 print(reg_predict) 
 
-#%%
+
 #Criação do DataFrame para comparação dos resultados
 df_predict = dammy[['pessoa feliz']].copy()
 df_predict['predict_arvore'] = arvore_predict
@@ -72,13 +75,13 @@ df_predict['proba_naive'] = naive.predict_proba(X)[:,1]
 df_predict['predict_reg'] = reg_predict
 df_predict['proba_reg'] = reg.predict_proba(X)[:,1]
 #print(df_predict)
-#%%
+
 #Cálculo da acurácia manualmente
 #md = ( df_predict['pessoa feliz'] == df_predict['predict_arvore']).mean()
 #print(md)
 #md2 = pd.crosstab(df_predict['pessoa feliz'], df_predict['predict_arvore'])
 #print(md2)
-#%% Cálculo das métricas com sklearn
+# Cálculo das métricas com sklearn
 acc_arvore = metrics.accuracy_score(df_predict['pessoa feliz'], df_predict['predict_arvore'])
 #print(acc_arvore)
 precisao_arvore = metrics.precision_score(df_predict['pessoa feliz'], df_predict['predict_arvore'])
@@ -90,7 +93,7 @@ roc_arvore = metrics.roc_curve(df_predict['pessoa feliz'], df_predict['predict_p
 auc_arvore = metrics.auc(roc_arvore[0], roc_arvore[1])
 print(auc_arvore)
 
-#%% 
+
 #Cálculo das métricas do Naive Bayes
 acc_naive = metrics.accuracy_score(df_predict['pessoa feliz'], df_predict['predict_naive'])
 #print(acc_naive)
@@ -104,7 +107,6 @@ auc_naive = metrics.auc(roc_naive[0], roc_naive[1])
 print(auc_naive)  
 
 
-#%% 
 #Cálculo das métricas da Regressão Logística
 acc_reg = metrics.accuracy_score(df_predict['pessoa feliz'], df_predict['predict_reg'])
 #print(acc_reg)
@@ -116,7 +118,7 @@ roc_reg = metrics.roc_curve(df_predict['pessoa feliz'], df_predict['proba_reg'])
 #print(roc_reg)
 auc_reg = metrics.auc(roc_reg[0], roc_reg[1])
 print(auc_reg)  
-#%% 
+
 #Plotagem da Curva ROC  
 plt.figure(dpi=100)
 plt.plot(roc_arvore[0], roc_arvore[1],'o-')
@@ -129,4 +131,9 @@ plt.xlabel('1-Especificidade (FPR)')
 plt.ylabel('recall (TPR)')
 plt.legend( ['AUC Árvore: %.2f'%auc_arvore, 'AUC Naive: %.2f'%auc_naive, 'AUC Regressão Logística: %.2f'%auc_reg] )
 plt.show()
-# %%  
+
+#salvando o modelo de regressão logística   
+pd.Series({'model':reg, 'features':features}).to_pickle('data/reg_model.pkl')
+
+
+# %%
