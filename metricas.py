@@ -5,11 +5,17 @@ from sklearn import metrics
 import matplotlib.pyplot as plt
 from sklearn import naive_bayes
 from sklearn import linear_model
+import streamlit as st
 
 # leitura do arquivo excel
 df = pd.read_excel("data/DadosComunidade2.xlsx") 
 df = df.loc[:, ~df.columns.str.contains("^Unnamed")]
+#print(df.columns)   
+
+#df['Posição da cadeira (senioridade)'].unique()
+#print(df)
 #print(df.info())
+
 
 #tranformou em 0 e 1 as respostas sim e não
 df = df.replace({'Sim':1, 'Não':0} )
@@ -38,12 +44,15 @@ dummy_vars=['Como conheceu o Teo Me Why?',
 dammy = pd.get_dummies(df[dummy_vars]).astype(int)
 dammy[num_vars] = df[num_vars].copy()
 dammy['pessoa feliz'] = df['Voce se considera uma pessoa feliz?'].copy()
-print(dammy)
+print(dammy.columns)
 
+#%%
 # separação das variaveis preditoras e variavel alvo
 features = dammy.columns[:-1].tolist()
 X = dammy[features]
 y = dammy['pessoa feliz']  
+
+#%%
 
 
 #Treinamento dos modelos
@@ -136,4 +145,6 @@ plt.show()
 pd.Series({'model':reg, 'features':features}).to_pickle('data/reg_model.pkl')
 
 
+# %%
+dammy.columns
 # %%
