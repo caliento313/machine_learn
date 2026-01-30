@@ -2,12 +2,20 @@
 #criação do app com streamlit
 import streamlit as st
 import pandas as pd
+import joblib
+
+import joblib
+
+
+model = joblib.load('data/reg_model.pkl')
+joblib.dump(model, 'data/reg_model.pkl')
 
 #carregamento do modelo treinado
-model = pd.read_pickle('data/reg_model.pkl')
+# model = pd.read_pickle('data/reg_model.pkl')
 
 # Título e descrição do aplicativo
 st.title("Hello World App")
+st.title('O Siul é o gamechanger mais legal da concentrix e todos os moranguinhos gostam dele ')
 st.markdown("# Descubra a Felicidade!")
 st.markdown("Este aplicativo utiliza modelos de Machine Learning para prever se uma pessoa é feliz com base em suas respostas a um questionário.")
 
@@ -148,10 +156,10 @@ proba = model['model'].predict_proba(df[model['features']])
 
 # Exibição dos resultados
 if proba[0][1] > 0.5:
-    st.success(f"## Parabéns! Você é uma pessoa feliz! 🎉😊")
+    st.success(f"## Parabéns! Você é uma pessoa feliz!🎉😊")
 else:
-    st.error(f"## Não se preocupe! A felicidade é uma jornada, não um destino. 🌈💪 ")
+    st.error(f"## Não se preocupe! A felicidade é uma jornada, não um destino.🌈💪")
 
 # Exibição da probabilidade
-st.markdown(f"## A probabilidade de você ser uma pessoa feliz é de {proba[0][1]:.2%} !")  
+st.markdown(f"## A probabilidade de você ser uma pessoa feliz é de {proba[0][1]:.2%}!")  
 #%%
