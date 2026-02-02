@@ -162,4 +162,3 @@ else:
 
 # Exibição da probabilidade
 st.markdown(f"## A probabilidade de você ser uma pessoa feliz é de {proba[0][1]:.2%}!")  
-#%%
