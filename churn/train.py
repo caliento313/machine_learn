@@ -2,6 +2,8 @@ import pandas as pd
 from sklearn import model_selection
 from sklearn import tree
 import matplotlib.pyplot as plt
+from feature_engine import discretisation
+
 
 #Metodo SEMMA
 
@@ -69,7 +71,9 @@ X, y = df_train[features], df_train[target]
 #print(X)
 #print(y) 
 
-#SAMPLE (Seleção de uma amostra representativa dos dados para análise exploratória)
+#$$$$        SAMPLE 
+# 
+# (Seleção de uma amostra representativa dos dados para análise exploratória)
 # Para a etapa de amostragem, podemos selecionar uma amostra representativa dos dados para 
 # realizar a análise exploratória. Isso pode ser feito utilizando a função `sample` do pandas, 
 # que permite selecionar uma amostra aleatória dos dados. Por exemplo, podemos selecionar 10% dos dados 
@@ -86,7 +90,8 @@ X_train, X_valid, y_train, y_valid = model_selection.train_test_split(
 #print('Variavel Resposta  Treinamento:', y_train.mean())
 #print('Variavel Resposta  Validacao:', y_valid.mean())
 
-#EPLORE (Análise exploratória dos dados, missing values, análise de variáveis preditoras)
+#  $$$$      EXPLORE 
+# (Análise exploratória dos dados, missing values, análise de variáveis preditoras)
 
 # Análise de valores ausentes
 X_train.isna().sum().sort_values(ascending=False)
@@ -121,4 +126,16 @@ features_importance[features_importance['acum'] < 0.95]
 #print(features_importance[features_importance['acum'] < 0.95])
 
 best_features = features_importance[features_importance['acum'] < 0.95]['index'].tolist()
-print(best_features)
+#print(best_features)
+
+#  $$$$      MODIFY
+# (Modificação dos dados, tratamento de valores ausentes, criação de novas variáveis,)
+
+tree_discratizaito = discretisation.DecisionTreeDiscretiser(variables=best_features,regression=False, 
+                                                            bin_output='bin_number',
+                                                            cv=3)
+tree_discratizaito.fit(X_train, y_train)
+#print(X_train.head())
+
+X_train_transformed = tree_discratizaito.transform(X_train)
+print(X_train_transformed.head())
