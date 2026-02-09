@@ -146,15 +146,18 @@ onehot = encoding.OneHotEncoder(variables=best_features, ignore_format=True, dro
 
 reg = linear_model.LogisticRegression(penalty= None, random_state=42, max_iter=1000)
 
+#       
+#
+##
 model_pipeline = pipeline.Pipeline(steps=[
     ('discretizacao', tree_discratizaito),  
     ('onehot', onehot),
     ('modelo', reg)
 ])  
+# 
 model_pipeline.fit(X_train, y_train) 
-
-
-
+# Avaliação do modelo utilizando métricas de desempenho e validação cruzada
+#
 X_train_predict = model_pipeline.predict(X_train)
 X_train_predict_proba = model_pipeline.predict_proba(X_train)[:,1]
 acc_train = metrics.accuracy_score(y_train, X_train_predict)
@@ -162,14 +165,14 @@ auc_train = metrics.roc_auc_score(y_train, X_train_predict_proba)
 print('Acurácia Treino:', acc_train)
 print('AUC Treino:', auc_train) 
 
-
+# Avaliação do modelo utilizando métricas de desempenho e validação cruzada
 X_test_predict = model_pipeline.predict(X_valid)
 X_test_predict_proba = model_pipeline.predict_proba(X_valid)[:,1]   
 acc_test = metrics.accuracy_score(y_valid, X_test_predict)
 auc_test = metrics.roc_auc_score(y_valid, X_test_predict_proba)
 print('Acurácia Teste:', acc_test)
 print('AUC Teste:', auc_test)
-
+# Avaliação do modelo utilizando métricas de desempenho e validação cruzada
 
 oot_predict = model_pipeline.predict(oot[features])
 oot_predict_proba = model_pipeline.predict_proba(oot[features])[:,1] 
@@ -177,3 +180,6 @@ acc_oot = metrics.accuracy_score(oot[target], oot_predict)
 auc_oot = metrics.roc_auc_score(oot[target], oot_predict_proba) 
 print('Acurácia OOT:', acc_oot)
 print('AUC OOT:', auc_oot)  
+
+# $$$$      ASSESS
+# (Avaliação do modelo utilizando métricas de desempenho e validação cruzada)   
