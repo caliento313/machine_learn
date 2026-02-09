@@ -1,8 +1,10 @@
 import pandas as pd 
-from sklearn import model_selection
+from sklearn import linear_model, model_selection
 from sklearn import tree
 import matplotlib.pyplot as plt
-from feature_engine import discretisation
+from feature_engine import discretisation, encoding 
+from sklearn import metrics
+from sklearn import pipeline
 
 
 #Metodo SEMMA
@@ -130,12 +132,48 @@ best_features = features_importance[features_importance['acum'] < 0.95]['index']
 
 #  $$$$      MODIFY
 # (Modificação dos dados, tratamento de valores ausentes, criação de novas variáveis,)
+# Discretização das variáveis preditoras utilizando árvore de decisão
+# (Transformação de variáveis contínuas em categóricas para melhorar a performance do modelo
 
 tree_discratizaito = discretisation.DecisionTreeDiscretiser(variables=best_features,regression=False, 
                                                             bin_output='bin_number',
                                                             cv=3)
-tree_discratizaito.fit(X_train, y_train)
-#print(X_train.head())
 
-X_train_transformed = tree_discratizaito.transform(X_train)
-print(X_train_transformed.head())
+onehot = encoding.OneHotEncoder(variables=best_features, ignore_format=True, drop_last=True )
+
+#  $$$$      MODEL
+# (Construção do modelo preditivo utilizando técnicas de machine learning)  
+
+reg = linear_model.LogisticRegression(penalty= None, random_state=42, max_iter=1000)
+
+model_pipeline = pipeline.Pipeline(steps=[
+    ('discretizacao', tree_discratizaito),  
+    ('onehot', onehot),
+    ('modelo', reg)
+])  
+model_pipeline.fit(X_train, y_train) 
+
+
+
+X_train_predict = model_pipeline.predict(X_train)
+X_train_predict_proba = model_pipeline.predict_proba(X_train)[:,1]
+acc_train = metrics.accuracy_score(y_train, X_train_predict)
+auc_train = metrics.roc_auc_score(y_train, X_train_predict_proba)
+print('Acurácia Treino:', acc_train)
+print('AUC Treino:', auc_train) 
+
+
+X_test_predict = model_pipeline.predict(X_valid)
+X_test_predict_proba = model_pipeline.predict_proba(X_valid)[:,1]   
+acc_test = metrics.accuracy_score(y_valid, X_test_predict)
+auc_test = metrics.roc_auc_score(y_valid, X_test_predict_proba)
+print('Acurácia Teste:', acc_test)
+print('AUC Teste:', auc_test)
+
+
+oot_predict = model_pipeline.predict(oot[features])
+oot_predict_proba = model_pipeline.predict_proba(oot[features])[:,1] 
+acc_oot = metrics.accuracy_score(oot[target], oot_predict)
+auc_oot = metrics.roc_auc_score(oot[target], oot_predict_proba) 
+print('Acurácia OOT:', acc_oot)
+print('AUC OOT:', auc_oot)  
