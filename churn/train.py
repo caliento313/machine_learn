@@ -144,42 +144,79 @@ onehot = encoding.OneHotEncoder(variables=best_features, ignore_format=True, dro
 #  $$$$      MODEL
 # (Construção do modelo preditivo utilizando técnicas de machine learning)  
 
+# O código apresentado tem como objetivo treinar e avaliar um modelo de Regressão Logística 
+# utilizando a biblioteca scikit-learn, aplicando um fluxo padronizado de pré-processamento e modelagem 
+# por meio de um Pipeline. Inicialmente, o modelo é definido sem regularização (penalty=None),
+#  com controle de aleatoriedade (random_state=42) e número máximo de iterações 
+# ajustado para garantir a convergência.
+
+# O Pipeline é composto por três etapas principais: discretização das variáveis, one-hot encoding e modelagem.
+#  A discretização transforma variáveis contínuas em faixas, facilitando a captura de padrões não lineares. 
+# Em seguida, o one-hot encoding converte variáveis categóricas em variáveis binárias,
+#  tornando-as compatíveis com o modelo. Por fim, a regressão logística é ajustada aos dados. 
+# O uso do Pipeline garante que o mesmo pré-processamento seja aplicado de forma consistente às bases de treino,
+# teste e out-of-time, evitando vazamento de informação.
+
+# O treinamento do modelo é realizado exclusivamente com a base de treino. Após o ajuste,
+#  o desempenho é avaliado nessa mesma base por meio da acurácia, da AUC (Area Under the Curve) e da curva ROC, 
+# utilizando tanto as classes previstas quanto as probabilidades estimadas para a classe positiva.
+
+# Em seguida, o modelo é avaliado na base de validação/teste, 
+# seguindo exatamente o mesmo processo de predição e cálculo das métricas.
+#  Essa etapa permite analisar a capacidade de generalização do modelo em dados não utilizados no treinamento.
+
+# Por fim, o desempenho é mensurado na base OOT (Out-of-Time), 
+# que representa dados de um período temporal distinto e posterior ao treinamento.
+#  A avaliação nessa base é fundamental para verificar a estabilidade temporal do modelo 
+# e identificar possíveis degradações de performance ao longo do tempo.
+
+# Como resultado, são apresentadas as métricas de acurácia e AUC para as bases de treino, teste e OOT, 
+# permitindo uma comparação direta entre elas e fornecendo subsídios para análise de overfitting,
+#  generalização e robustez do modelo ao longo do tempo.
+
 reg = linear_model.LogisticRegression(penalty= None, random_state=42, max_iter=1000)
 
-#       
-#
-##
 model_pipeline = pipeline.Pipeline(steps=[
     ('discretizacao', tree_discratizaito),  
     ('onehot', onehot),
     ('modelo', reg)
 ])  
-# 
+  
 model_pipeline.fit(X_train, y_train) 
-# Avaliação do modelo utilizando métricas de desempenho e validação cruzada
-#
+# 
 X_train_predict = model_pipeline.predict(X_train)
 X_train_predict_proba = model_pipeline.predict_proba(X_train)[:,1]
 acc_train = metrics.accuracy_score(y_train, X_train_predict)
 auc_train = metrics.roc_auc_score(y_train, X_train_predict_proba)
+roc_train = metrics.roc_curve(y_train, X_train_predict_proba)
 print('Acurácia Treino:', acc_train)
 print('AUC Treino:', auc_train) 
 
-# Avaliação do modelo utilizando métricas de desempenho e validação cruzada
 X_test_predict = model_pipeline.predict(X_valid)
 X_test_predict_proba = model_pipeline.predict_proba(X_valid)[:,1]   
 acc_test = metrics.accuracy_score(y_valid, X_test_predict)
 auc_test = metrics.roc_auc_score(y_valid, X_test_predict_proba)
+roc_test = metrics.roc_curve(y_valid, X_test_predict_proba)
 print('Acurácia Teste:', acc_test)
 print('AUC Teste:', auc_test)
-# Avaliação do modelo utilizando métricas de desempenho e validação cruzada
 
 oot_predict = model_pipeline.predict(oot[features])
 oot_predict_proba = model_pipeline.predict_proba(oot[features])[:,1] 
 acc_oot = metrics.accuracy_score(oot[target], oot_predict)
 auc_oot = metrics.roc_auc_score(oot[target], oot_predict_proba) 
+roc_oot = metrics.roc_curve(oot[target], oot_predict_proba)
 print('Acurácia OOT:', acc_oot)
 print('AUC OOT:', auc_oot)  
 
-# $$$$      ASSESS
-# (Avaliação do modelo utilizando métricas de desempenho e validação cruzada)   
+plt.figure(dpi=100, figsize=(10,10))
+plt.plot(roc_train[0], roc_train[1]    )
+plt.plot(roc_test[0], roc_test[1],     )
+plt.plot(roc_oot[0], roc_oot[1],     )
+plt.grid(True)
+plt.xlabel('sensibilidade')
+plt.ylabel('especificidade  ')
+plt.title('ROC Curves')
+plt.legend([f'Treino AUC: {100*auc_train:.4f}',
+            f'Teste AUC: {100*auc_test:.4f}',
+            f'OOT AUC: {100*auc_oot:.4f}'])
+plt.show()
